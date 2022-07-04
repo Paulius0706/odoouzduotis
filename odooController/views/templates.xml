@@ -1,0 +1,230 @@
+<odoo>
+    <data>
+        <template id="index">
+         <t t-call="website.layout">
+          <t t-set="title">My first project</t>
+          <div class="oe_structure">
+            <div class="container">
+              <h3>Užduotis:</h3>
+              <p>
+                Sukurti naują Odoo modulį, skirtą saugoti informacijai apie įvairius dokumentus ar knygas. Modulyje turėtų būti sukurtas naujas dokumentų modelis, kuriame būtų būtų saugomas pavadinimas, aprašymas ir įmonė (Many2one ryšys su res.company modeliu).
+                Sukūrus patį modelį reikėtų sukurti veiksmą, kad per meniu būtų galima pasiekti modelio duomenų medžio rodinį ir formą.
+              </p>
+              <h3>--Documents---</h3>
+              
+              <form t-attf-action="{{ root }}/documentAdd" method="post">
+                <input type="submit" value="Add document"/>
+              </form>
+
+              <table class="table">
+                <tr> <td>ID</td><td>Name</td><td>Description</td><td>Company</td><td></td> </tr>
+                <t t-foreach="documents" t-as="document">
+                  <tr>
+                    <td><t t-raw="document.id"/></td>
+                    <td><t t-raw="document.name"/></td>
+                    <td><t t-raw="document.description"/></td>
+                    <td>
+                      <t t-foreach="companies" t-as="company">
+                        <a t-if="company == document.company_id" t-attf-href="{{ root }}/company/{{ company.id }}"><t t-raw="company.name"/></a>
+                      </t>
+                    </td>
+                    <td><a t-attf-href="{{ root }}/document/{{ document.id }}"> Link to document </a></td>
+                  </tr>
+                </t>
+              </table>
+              <p>Count: <t t-raw="documentsCount"/></p>
+              <h3>-----</h3>
+              
+              <br/>
+              <h3>--Companies---</h3>
+              <t t-foreach="companies" t-as="company">
+                <table class="table">
+                  <tr>
+                    <td style="width:20%">ID <t t-raw="company.id"/></td>
+                    <td style="width:40%">Name <a t-attf-href="{{ root }}/company/{{ company.id }}"><t t-raw="company.name"/></a></td>
+                    <td style="width:40%">Email <t t-raw="company.email"/></td>
+                    <td style="width:30%"> <t t-raw="company.email"/></td>
+                  </tr>
+                </table>
+                <details style="background-color: #eeeeee;">
+                  <summary>Documents</summary>
+                  <table class="table">
+                  <t t-foreach="company.documents_id" t-as="cDocument">
+                    <t t-foreach="documents" t-as="document">
+                      <tr t-if="cDocument == document" >
+                        <td>ID <t t-raw="document.id"/></td>
+                        <td>Name <a t-attf-href="{{ root }}/document/{{ document.id }}"><t t-raw="document.name"/></a></td>
+                        <td>Description <t t-raw="document.description"/></td>
+                      </tr>
+                    </t>
+                  </t>
+                  </table>
+                </details>
+              </t>
+              <p>Count: <t t-raw="companiesCount"/></p>
+              <h3>-----</h3>
+            </div>
+          </div>
+         </t>
+        </template>
+
+
+        <template id="document">
+          <t t-call="website.layout">
+          <t t-set="title">My first project</t>
+          <h3>Document</h3>
+          <a t-attf-href="{{ root }}/"> Go Back To Index </a>
+          <a t-attf-href="{{ root }}/documentEdit/{{ document.id }}"> Edit </a>
+          <table class="table" state="width=50%">
+            <tr>
+              <td>ID</td><td><t t-raw="document.id"/></td>
+            </tr>
+            <tr>
+              <td>Name</td><td><t t-raw="document.name"/></td>
+            </tr>
+            <tr>
+              <td>Description</td><td><t t-raw="document.description"/></td>
+            </tr>
+          </table>
+          <h3>Connected to Company</h3>
+          <table class="table" state="width=50%" t-if="company">
+            <tr>
+              <td>Company ID</td><td><t t-raw="company.id"/></td>
+            </tr>
+            <tr>
+              <td>Company name</td><td><t t-raw="company.name"/></td>
+            </tr>
+            <tr>
+              <td>Company Email</td><td><t t-raw="company.email"/></td>
+            </tr>
+            <tr>
+              <td>Link to company -></td><td> <a t-attf-href="{{ root }}/company/{{ company.id }}"> Link to Comapany </a> </td>
+            </tr>
+          </table>
+          </t>
+        </template>
+
+        <template id="documentEdit">
+          <t t-call="website.layout">
+          <t t-set="title">My first project</t>
+          <h3>Document</h3>
+          <a t-attf-href="{{ root }}/"> Go Back To Index </a>
+          <form action="/odooController/documentUpdate" method="post">
+            <input type="Submit" value="Save"/>
+            <table class="table" state="width=50%">
+              <tr>
+                <td>ID</td>
+                <td>
+                  <t t-raw="document.id"/>
+                  <input type="hidden" name="id" t-att-value="document.id"/>
+                </td>
+              </tr>
+              <tr>
+                <td>Name</td>
+                <td><input type="text" name="name" t-att-value="document.name"/></td>
+              </tr>
+              <tr>
+                <td>Description</td>
+                <td><input type="text" name="description" t-att-value="document.description"/></td>
+              </tr>
+            </table>
+
+            <h3>Connected to Company</h3>
+            <select name="company_id" >
+              <t t-if="not document.company_id">
+                <option t-att-value="0" selected="true">No Company</option>
+              </t>
+              <t t-foreach="companies" t-as="company">
+                <option t-att-value="company.id" t-if="document.company_id == company" selected="true"><t t-raw="company.name"/></option>
+                <option t-att-value="company.id" t-if="document.company_id != company"                ><t t-raw="company.name"/></option>                             
+              </t>
+            </select>
+
+          </form >
+          </t>
+        </template>
+        
+        <template id="documentAdd">
+          <t t-call="website.layout">
+          <t t-set="title">My first project</t>
+          <h3>Document Add</h3>
+          <a t-attf-href="{{ root }}/"> Go Back To Index </a>
+          <form action="/odooController/documentInsert" method="post">
+            <input type="Submit" value="Add"/>
+            <table class="table" state="width=50%">
+              <tr>
+                <td>Name</td>
+                <td><input type="text" name="name" /></td>
+              </tr>
+              <tr>
+                <td>Description</td>
+                <td><input type="text" name="description" /></td>
+              </tr>
+            </table>
+
+            <h3>Connected to Company</h3>
+            <select name="company_id" >
+              <option t-att-value="creationCompany.id" t-if="creationCompany" selected="true"><t t-raw="creationCompany.name"/></option>
+              <t t-if="not creationCompany">
+                <option t-att-value="0" selected="true">No Company</option>
+                <t t-foreach="companies" t-as="company">
+                  <option t-att-value="company.id" ><t t-raw="company.name"/></option>                             
+                </t>
+              </t>
+            </select>
+          </form >
+          </t>
+        </template>
+
+        <template id="documentUpdate">
+          <meta http-equiv = "refresh" t-attf-content="0; url = {{root}}/document/{{ document.id }}"/>
+        </template>
+        <template id="documentInsert">
+          <meta t-if="company"     http-equiv = "refresh" t-attf-content="0; url = {{root}}/company/{{ company.id }}"/>
+          <meta t-if="not company" http-equiv = "refresh" t-attf-content="0; url = {{root}}/"/>
+        </template>
+
+
+        <template id="company">
+          <t t-call="website.layout">
+          <t t-set="title">My first project</t>
+          <h3>Company</h3>
+          <a t-attf-href="{{ root }}/"> Go Back To Index </a>
+          <table class="table" state="width=50%">
+            <tr>
+              <td>Company ID</td><td><t t-raw="company.id"/></td>
+            </tr>
+            <tr>
+              <td>Company name</td><td><t t-raw="company.name"/></td>
+            </tr>
+            <tr>
+              <td>Company Email</td><td><t t-raw="company.email"/></td>
+            </tr>
+          </table>
+          <h3>Connected to Documents</h3>
+
+          <form t-attf-action="{{ root }}/documentAdd" method="post">
+            <input type="hidden" name="company" t-att-value="company.id"/>
+            <input type="submit" value="Add document"/>
+          </form>
+
+          <table class="table" state="width=50%">
+            <tr>
+              <td>ID</td><td>Name</td><td>Description</td><td>Links</td>
+            </tr>
+            <t t-foreach="documents" t-as="document">
+              <tr>
+                <td><t t-raw="document.id"/></td>
+                <td><t t-raw="document.name"/></td>
+                <td><t t-raw="document.description"/></td>
+                <td><a t-attf-href="{{ root }}/document/{{ document.id }}"> Link to Document </a></td>
+              </tr>
+            </t>
+          </table>
+          </t>
+        </template>
+        
+
+
+    </data>
+</odoo>
